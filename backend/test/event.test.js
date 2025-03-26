@@ -8,6 +8,7 @@ const Event = require("../models/Event");
 const { addEvent } = require("../controllers/eventController");
 const { getEvents } = require("../controllers/eventController");
 const { updateEvent } = require("../controllers/eventController");
+const { deleteEvent } = require("../controllers/eventController");
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -204,6 +205,67 @@ describe("updateEvent Function Test", () => {
     sinon.stub(Event, "findById").throws(new Error("DB error"));
 
     await updateEvent(req, res);
+
+    expect(res.status.calledWith(500)).to.be.true;
+    expect(res.json.calledWithMatch({ message: "DB error" })).to.be.true;
+  });
+});
+
+describe("deleteEvent Function Test", () => {
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it("should delete an event successfully", async () => {
+    const eventId = new mongoose.Types.ObjectId().toString();
+
+    const mockEvent = {
+      _id: eventId,
+      remove: sinon.stub().resolves(),
+    };
+
+    const req = { params: { id: eventId } };
+    const res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.spy(),
+    };
+
+    const findByIdStub = sinon.stub(Event, "findById").resolves(mockEvent);
+
+    await deleteEvent(req, res);
+
+    expect(findByIdStub.calledOnceWith(eventId)).to.be.true;
+    expect(mockEvent.remove.calledOnce).to.be.true;
+    expect(res.json.calledWith({ message: "Event deleted" })).to.be.true;
+  });
+
+  it("should return 404 if event is not found", async () => {
+    const eventId = new mongoose.Types.ObjectId().toString();
+    const req = { params: { id: eventId } };
+    const res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.spy(),
+    };
+
+    sinon.stub(Event, "findById").resolves(null);
+
+    await deleteEvent(req, res);
+
+    expect(res.status.calledWith(404)).to.be.true;
+    expect(res.json.calledWith({ message: "Event not found" })).to.be.true;
+  });
+
+  it("should return 500 if an error occurs", async () => {
+    const eventId = new mongoose.Types.ObjectId().toString();
+    const req = { params: { id: eventId } };
+    const res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.spy(),
+    };
+
+    sinon.stub(Event, "findById").throws(new Error("DB error"));
+
+    await deleteEvent(req, res);
 
     expect(res.status.calledWith(500)).to.be.true;
     expect(res.json.calledWithMatch({ message: "DB error" })).to.be.true;
