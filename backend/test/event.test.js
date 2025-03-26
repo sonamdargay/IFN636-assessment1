@@ -7,6 +7,7 @@ const app = require("../server");
 const Event = require("../models/Event");
 const { addEvent } = require("../controllers/eventController");
 const { getEvents } = require("../controllers/eventController");
+const { updateEvent } = require("../controllers/eventController");
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -122,6 +123,88 @@ describe("getEvents Function Test", () => {
     await getEvents(req, res);
 
     expect(findStub.calledOnce).to.be.true;
+    expect(res.status.calledWith(500)).to.be.true;
+    expect(res.json.calledWithMatch({ message: "DB error" })).to.be.true;
+  });
+});
+
+describe("updateEvent Function Test", () => {
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it("should update an event successfully", async () => {
+    const eventId = new mongoose.Types.ObjectId();
+    const existingEvent = {
+      _id: eventId,
+      eventName: "Old Name",
+      description: "Old description",
+      date: "2025-06-01",
+      location: "Old Location",
+      save: sinon.stub().resolvesThis(), // mock save method
+    };
+
+    const req = {
+      params: { id: eventId },
+      body: {
+        eventName: "Updated Event",
+        description: "Updated description",
+        date: "2025-06-30",
+        location: "New Location",
+      },
+    };
+
+    const res = {
+      json: sinon.spy(),
+      status: sinon.stub().returnsThis(),
+    };
+
+    sinon.stub(Event, "findById").resolves(existingEvent);
+
+    await updateEvent(req, res);
+
+    expect(existingEvent.eventName).to.equal("Updated Event");
+    expect(existingEvent.description).to.equal("Updated description");
+    expect(existingEvent.date).to.equal("2025-06-30");
+    expect(existingEvent.location).to.equal("New Location");
+    expect(existingEvent.save.calledOnce).to.be.true;
+    expect(res.json.calledWith(existingEvent)).to.be.true;
+  });
+
+  it("should return 404 if event not found", async () => {
+    const req = {
+      params: { id: new mongoose.Types.ObjectId() },
+      body: {},
+    };
+
+    const res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.spy(),
+    };
+
+    sinon.stub(Event, "findById").resolves(null); // simulate no event found
+
+    await updateEvent(req, res);
+
+    expect(res.status.calledWith(404)).to.be.true;
+    expect(res.json.calledWith({ message: "Event not found" })).to.be.true;
+  });
+
+  it("should return 500 on error", async () => {
+    const req = {
+      params: { id: new mongoose.Types.ObjectId() },
+      body: {},
+    };
+
+    const res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.spy(),
+    };
+
+    sinon.stub(Event, "findById").throws(new Error("DB error"));
+
+    await updateEvent(req, res);
+
     expect(res.status.calledWith(500)).to.be.true;
     expect(res.json.calledWithMatch({ message: "DB error" })).to.be.true;
   });
