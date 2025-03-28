@@ -20,7 +20,7 @@ This assignment focuses on building a full-stack CRUD application with user auth
 
 ## **Project Management**
 
-- JIRA Board: [Insert your JIRA Board URL here]
+- JIRA Board: [JIRA Board URL ](https://sonamdargay.atlassian.net/jira/software/projects/EMS/summary)
 - Requirement Diagram: [Click to download in .drawio format](https://drive.google.com/file/d/1bXZMElpsvbIE059mDgGtAwBYng40XKyz/view?usp=sharing)
   ![image info](./pm-files/EventManagementSys.drawio.png)
 
