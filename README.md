@@ -101,10 +101,20 @@ GitHub Actions is used to automate Continuous Integration (CI) and performs:
   - Starts or restarts all backend services using PM2 for zero-downtime restarts.
 - **File Path**: `.github/workflows/backend-ci.yml`
 
-Continuos Deployment(CD) is handled using a self-hosted runner configured on an AWS EC2 instance. The workflow continues with the following steps:
+Continuous Deployment(CD) is handled using a self-hosted runner configured on an AWS EC2 instance. The workflow continues with the following steps:
 
 - Writes production secrets to a `.env` file on the EC2 instance.
 - Restarts the backend server using `PM2`, a process manager for `Node.js`.
 - Serves the frontend using `pm2 serve` on port `3000`.
 - Configures Nginx to act as a reverse proxy, forwarding incoming HTTP requests to the frontend server running locally.
 - Restarts both Nginx and PM2 processes to reflect the latest deployment.
+
+## Git Branching Strategy
+
+- Feature branches are created for each functionality:
+  - `feature/create-event`
+  - `feature/update-event`
+  - `feature/read-event`
+  - `feature/delete-event`
+- After development, feature branches are merged into the `main` branch using Git commands.
+- Push the `main` branch to the GitHub triggers CI/CD pipeline.
