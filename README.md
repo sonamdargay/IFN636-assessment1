@@ -1,68 +1,110 @@
 # **Assignment: Full-Stack CRUD Application Development with DevOps Practices**
 
-## **Objective**
+## **Overview**
 
-You have been provided with a starter project that includes user authentication using  **Node.js, React.js, and MongoDB**. Your task is to extend this application by implementing **CRUD (Create, Read, Update, Delete) operations** for a real-world application of your choice, while following industry best practices such as:
+This assignment focuses on building a full-stack CRUD application with user authentication using Node.js, React.js, and MongoDB. Students are required to extend a starter project by implementing CRUD functionality for a real-world use case (e.g., Event Management).
 
-* **Project Management with JIRA**
-* **Requirement Diagram using SysML**
-* **Version Control using GitHub**
-* **CI/CD Integration for Automated Deployment**
+## **Real-World Application**
 
-## **Requirements**
+**Event Management System** is a full-stack CRUD application for managing events, developed using _Node.js, Express, React.js, and MongoDB_. It supports user authentication and enables authenticated users to perform Create, Read, Update, and Delete operations on events. The project also follows DevOps best practices with GitHub version control, CI/CD pipelines, JIRA project management, and SysML-based requirement documentation.
 
-### **1. Choose a Real-World Application**
+## **Features**
 
-Select a meaningful use case for your CRUD operations. We will provide the list, you have to select it.
+- User Authentication using JWT
+- Create, view, update, and delete events
+- Protected routes for authorized access
+- RESTful API with Express.js
+- Responsive React frontend with forms and data tables
+- MongoDB database integration
+- CI/CD deployment to AWS
 
-### **2. Project Management with JIRA and SysML**
+## **Project Management**
 
-* Create a **JIRA project** and define:
-  * **Epic**
-  * **User Stories** (features required in your app)
-  * **Child issues & Subtasks** (breaking down development work)
-  * **Sprint Planning** (organizing work into milestones)
-* Document your JIRA **board URL** in the project README.
-* Draw a requirements diagram
+- JIRA Board: [Insert your JIRA Board URL here]
+- Requirement Diagram: [Click to download in .drawio format](https://drive.google.com/file/d/1bXZMElpsvbIE059mDgGtAwBYng40XKyz/view?usp=sharing)
+  ![image info](./pm-files/EventManagementSys.drawio.png)
 
-### **3. Backend Development (Node.js + Express + MongoDB)**
+## **Project Structure**
 
-* Create a user-friendly interface to interact with your API (Some portion developed, follow task manager app)).
-* Implement **forms** for adding and updating records.
-* Display data using  **tables, cards, or lists (Follow how we showed data in task manager app)**
+```
+/.github
+  ├── workflows/
+/backend
+  ├── config/
+  ├── controllers/
+  ├── middleware/
+  ├── models/
+  ├── routes/
+  ├── test/
+  ├── .env
+  ├── server.js
+  ├── package.json
+/frontend
+  ├── src/
+    ├── components/
+    ├── context/
+    ├── pages/
+    ├── App.js
+    ├── axiosConfig.jsx
+    ├── App.js
+    ├── index.js
+package.json
+README.md
+```
 
-### **4. Frontend Development (React.js)**
+## **Setup Instructions**
 
-* Create a user-friendly interface to interact with your API (**Some portion developed, follow task manager app)**.
-* Implement **forms** for adding, showing, deleting and updating records (CRUD).
-* Display data using  **tables, cards, or lists (Follow how we showed data in task manager app)**
+### **1. Clone the Repository**
 
-### **5. Authentication & Authorization**
+```
+git clone https://github.com/sonamdargay/IFN636-assessment1.git
+cd IFN636-assessment1
+```
 
-* Ensure **only authenticated users** can access and perform CRUD operations. (Already developed in your project)
-* Use **JWT (JSON Web Tokens)** for user authentication (Use the task manager one from .env file).
+### **2. Install Dependencies**
 
-### **6. GitHub Version Control & Branching Strategy**
+```
+npm run install-all
+```
 
-* Use **GitHub for version control** and maintain:
-  * `main` branch (stable production-ready code)
-  * Feature branches (`feature/xyz`) for each new functionality
-* Follow proper **commit messages** and  **pull request (PR) reviews** .
+### **3. Configure Environment Variables**
 
-### **7. CI/CD Pipeline Setup**
+Create a `.env` file in the `/backend` directory:
 
-* Implement a **CI/CD pipeline using GitHub Actions** to:
-  * Automatically **run tests** on every commit/pull request (Optional).
-  * Deploy the **backend** to **AWS** .
-  * Deploy the **frontend** to **AWS**.
-* Document your  **CI/CD workflow in the README** .
+```
+PORT=5001
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+```
 
-## **Submission Requirements**
+### **4. Run the project**
 
-* **JIRA Project Board URL** (user stories ).
-* **Requirment diagram** (Using project features)
-* **GitHub Repository** (`backend/` and `frontend/`).
-* **README.md** with:
+From the root directory of the project run the following to start both backend and frontend services together:
 
-  * Project setup instructions.
-  * CI/CD pipeline details.
+```
+npm run start
+```
+
+## CI/CD Pipeline
+
+GitHub Actions is used to automate Continuous Integration (CI) and performs:
+
+- Checks out the latest code from the repository.
+- Sets up the Node.js environment, using version 22
+- Loads environment secrets: `MONGO_URI`, `JWT_SECRET`, and `PORT` from GitHub Secrets
+- Installs dependencies for both the backend and frontend using `yarn`
+- Builds the `frontend` and clears any old build artifacts
+- Runs `backend` tests to validate the functionality
+- Creates a `.env` file dynamically using the secret PROD content
+- Uses PM2 to manage backend processes
+  - Stops any currently running processes
+  - Starts or restarts all backend services using PM2 for zero-downtime restarts.
+- **File Path**: `.github/workflows/backend-ci.yml`
+
+Continuos Deployment(CD) is handled using a self-hosted runner configured on an AWS EC2 instance. The workflow continues with the following steps:
+
+- Writes production secrets to a `.env` file on the EC2 instance.
+- Restarts the backend server using `PM2`, a process manager for `Node.js`.
+- Serves the frontend using `pm2 serve` on port `3000`.
+- Configures Nginx to act as a reverse proxy, forwarding incoming HTTP requests to the frontend server running locally.
+- Restarts both Nginx and PM2 processes to reflect the latest deployment.
